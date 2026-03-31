@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { SCHOOLS, PROGRAMS, CONTACTS } from '@/lib/data';
 import { calculateLineItem, calculateBookingTotal, formatCurrencyFull } from '@/lib/pricing';
 import { 
@@ -13,7 +13,31 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PageTransition from '@/components/layout/PageTransition';
 
-export default function NewBookingPage() {
+function getStepTitle(s: number) {
+  const steps = [
+    'Institution Selection',
+    'Primary Logistics Contact',
+    'Scheduling & Arrival',
+    'Capacity Metrics',
+    'Program Curation',
+    'Ready for Finalization'
+  ];
+  return steps[s-1];
+}
+
+function getStepGuidance(s: number) {
+  const guidance = [
+    'Select a school from the CSTL registry. Recent partners appear at the top.',
+    'Identify the coordinator responsible for this specific trip’s logistics.',
+    'Select the target date. Check the calendar for resource availability alerts.',
+    'Enter pupil and adult counts. Pricing rules adjust automatically based on these metrics.',
+    'Choose the educational programs. Note that Exhibit is charged differently than Outdoor programs.',
+    'Review the operational summary and financial exposure before locking the booking.'
+  ];
+  return guidance[s-1];
+}
+
+function NewBookingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
@@ -361,26 +385,17 @@ export default function NewBookingPage() {
   );
 }
 
-function getStepTitle(s: number) {
-  const steps = [
-    'Institution Selection',
-    'Primary Logistics Contact',
-    'Scheduling & Arrival',
-    'Capacity Metrics',
-    'Program Curation',
-    'Ready for Finalization'
-  ];
-  return steps[s-1];
-}
-
-function getStepGuidance(s: number) {
-  const guidance = [
-    'Select a school from the CSTL registry. Recent partners appear at the top.',
-    'Identify the coordinator responsible for this specific trip’s logistics.',
-    'Select the target date. Check the calendar for resource availability alerts.',
-    'Enter pupil and adult counts. Pricing rules adjust automatically based on these metrics.',
-    'Choose the educational programs. Note that Exhibit is charged differently than Outdoor programs.',
-    'Review the operational summary and financial exposure before locking the booking.'
-  ];
-  return guidance[s-1];
+export default function NewBookingPage() {
+  return (
+    <Suspense fallback={
+       <div className="min-screen flex items-center justify-center bg-slate-50">
+          <div className="flex flex-col items-center gap-4">
+             <div className="w-12 h-12 border-4 border-sky-200 border-t-sky-600 rounded-full animate-spin"></div>
+             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Initializing...</p>
+          </div>
+       </div>
+    }>
+      <NewBookingContent />
+    </Suspense>
+  );
 }
